@@ -5,10 +5,12 @@ Affiche un menu pour choisir le jeu auquel jouer.
 
 from anagramme import jouer_anagramme
 from pendu import jouer_pendu
+from morpion import jouer_morpion
 
 JEUX = {
     "1": ("Anagramme chronométré", jouer_anagramme),
     "2": ("Pendu", jouer_pendu),
+    "3": ("Morpion", jouer_morpion),
 }
 
 
