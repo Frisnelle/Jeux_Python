@@ -1,5 +1,9 @@
 """
 Version graphique (Tkinter) du morpion, intégrée au hub à fenêtre unique.
+Inclut un effet de survol sur les cases vides, un highlight de la
+combinaison gagnante, un bouton Abandonner, et l'enregistrement du
+résultat dans le score (uniquement en mode contre l'IA, où il y a un
+"joueur" clair du point de vue du score).
 """
 
 import random
@@ -7,9 +11,11 @@ import tkinter as tk
 
 from style import (
     COULEUR_FOND, COULEUR_TITRE, COULEUR_SECONDAIRE, COULEUR_SECONDAIRE_SURVOL,
-    COULEUR_ERREUR, COULEUR_ACCENT, bouton, bouton_retour,
+    COULEUR_ERREUR, COULEUR_ACCENT, COULEUR_GAGNANT,
+    bouton, bouton_secondaire, bouton_retour,
 )
 from ecran_choix import FrameChoix
+from score import enregistrer_resultat
 
 COMBINAISONS_GAGNANTES = [
     (0, 1, 2), (3, 4, 5), (6, 7, 8),
@@ -25,11 +31,18 @@ DIFFICULTES_IA = {
 }
 
 
-def verifier_gagnant(grille):
-    for a, b, c in COMBINAISONS_GAGNANTES:
+def trouver_combinaison_gagnante(grille):
+    """Retourne le triplet d'indices gagnant, ou None s'il n'y en a pas encore."""
+    for combo in COMBINAISONS_GAGNANTES:
+        a, b, c = combo
         if grille[a] != " " and grille[a] == grille[b] == grille[c]:
-            return grille[a]
+            return combo
     return None
+
+
+def verifier_gagnant(grille):
+    combo = trouver_combinaison_gagnante(grille)
+    return grille[combo[0]] if combo else None
 
 
 def grille_pleine(grille):
@@ -116,7 +129,7 @@ class FrameMorpionJeu(tk.Frame):
             self, text=self._texte_tour(), font=("Segoe UI", 17, "bold"),
             bg=COULEUR_FOND, fg=COULEUR_TITRE,
         )
-        self.label_tour.pack(pady=(40, 15))
+        self.label_tour.pack(pady=(35, 15))
 
         conteneur_grille = tk.Frame(self, bg=COULEUR_FOND)
         conteneur_grille.pack(pady=5)
@@ -129,10 +142,25 @@ class FrameMorpionJeu(tk.Frame):
                 command=lambda i=i: self.jouer_case(i),
             )
             b.grid(row=i // 3, column=i % 3, padx=4, pady=4)
+            # Effet de survol : la case s'éclaire seulement si elle est encore vide.
+            b.bind("<Enter>", lambda e, i=i: self._survol_entree(i))
+            b.bind("<Leave>", lambda e, i=i: self._survol_sortie(i))
             self.boutons.append(b)
 
-        bouton(self, "🔁 Nouvelle partie", self.recommencer, largeur=18, hauteur=1).pack(pady=(15, 5))
+        self.conteneur_actions = tk.Frame(self, bg=COULEUR_FOND)
+        self.conteneur_actions.pack(pady=(15, 5))
+        bouton(self.conteneur_actions, "🔁 Nouvelle partie", self.recommencer, largeur=16, hauteur=1).grid(row=0, column=0, padx=4)
+        bouton_secondaire(self.conteneur_actions, "Abandonner", self.abandonner, largeur=12).grid(row=0, column=1, padx=4)
+
         bouton_retour(self, app.afficher_menu).pack(side="bottom", pady=15)
+
+    def _survol_entree(self, index):
+        if self.grille[index] == " " and not self.partie_terminee:
+            self.boutons[index].config(bg=COULEUR_SECONDAIRE_SURVOL)
+
+    def _survol_sortie(self, index):
+        if self.grille[index] == " ":
+            self.boutons[index].config(bg=COULEUR_SECONDAIRE)
 
     def _texte_tour(self):
         symbole = self.joueurs[self.tour % 2]
@@ -168,20 +196,40 @@ class FrameMorpionJeu(tk.Frame):
         couleur = COULEUR_ERREUR if symbole == "X" else COULEUR_ACCENT
         self.boutons[index].config(text=symbole, fg=couleur, state="disabled")
 
+    def abandonner(self):
+        if self.partie_terminee:
+            return
+        self.partie_terminee = True
+        self.label_tour.config(text="🚩 Partie abandonnée")
+        self._desactiver_tout()
+        if self.contre_ia:
+            enregistrer_resultat("morpion", "defaites")
+
     def _verifier_fin(self):
-        gagnant = verifier_gagnant(self.grille)
-        if gagnant:
+        combo = trouver_combinaison_gagnante(self.grille)
+        if combo:
             self.partie_terminee = True
+            gagnant = self.grille[combo[0]]
+            for i in combo:
+                self.boutons[i].config(bg=COULEUR_GAGNANT)
+
             if self.contre_ia and gagnant == self.joueur_ia:
                 self.label_tour.config(text="🤖 L'IA a gagné !")
+                enregistrer_resultat("morpion", "defaites")
             else:
                 self.label_tour.config(text=f"🎉 {gagnant} a gagné !")
+                if self.contre_ia:
+                    enregistrer_resultat("morpion", "victoires")
             self._desactiver_tout()
             return True
+
         if grille_pleine(self.grille):
             self.partie_terminee = True
             self.label_tour.config(text="🤝 Match nul !")
+            if self.contre_ia:
+                enregistrer_resultat("morpion", "nuls")
             return True
+
         return False
 
     def _desactiver_tout(self):
@@ -193,7 +241,7 @@ class FrameMorpionJeu(tk.Frame):
         self.tour = 0
         self.partie_terminee = False
         for b in self.boutons:
-            b.config(text=" ", state="normal")
+            b.config(text=" ", state="normal", bg=COULEUR_SECONDAIRE)
         self.label_tour.config(text=self._texte_tour())
 
 

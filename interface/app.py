@@ -9,6 +9,7 @@ se remplacent, plutôt que d'ouvrir une nouvelle fenêtre à chaque étape.
 import tkinter as tk
 
 from style import COULEUR_FOND, COULEUR_TITRE, COULEUR_SOUS_TITRE, POLICE_TITRE, POLICE_SOUS_TITRE, bouton
+from score import charger_scores
 
 
 class App(tk.Tk):
@@ -17,15 +18,22 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Hub de jeux")
-        self.geometry("520x620")
         self.configure(bg=COULEUR_FOND)
         self.resizable(False, False)
+        self._centrer(520, 620)
 
         self.conteneur = tk.Frame(self, bg=COULEUR_FOND)
         self.conteneur.pack(fill="both", expand=True)
 
         self.frame_actuelle = None
         self.afficher_menu()
+
+    def _centrer(self, largeur, hauteur):
+        """Positionne la fenêtre au centre de l'écran de l'utilisateur au démarrage."""
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() - largeur) // 2
+        y = (self.winfo_screenheight() - hauteur) // 2
+        self.geometry(f"{largeur}x{hauteur}+{x}+{y}")
 
     def afficher_frame(self, classe_frame, **kwargs):
         """Détruit l'écran actuel (s'il existe) et affiche le nouveau à la place."""
@@ -39,7 +47,7 @@ class App(tk.Tk):
 
 
 class FrameMenu(tk.Frame):
-    """Écran d'accueil : un bouton par jeu."""
+    """Écran d'accueil : un bouton par jeu, plus un résumé des scores."""
 
     def __init__(self, parent, app):
         super().__init__(parent, bg=COULEUR_FOND)
@@ -47,12 +55,12 @@ class FrameMenu(tk.Frame):
         tk.Label(
             self, text="🎮 Hub de jeux", font=POLICE_TITRE,
             bg=COULEUR_FOND, fg=COULEUR_TITRE,
-        ).pack(pady=(50, 5))
+        ).pack(pady=(45, 5))
 
         tk.Label(
             self, text="Choisis un jeu pour commencer",
             font=POLICE_SOUS_TITRE, bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE,
-        ).pack(pady=(0, 40))
+        ).pack(pady=(0, 25))
 
         conteneur_boutons = tk.Frame(self, bg=COULEUR_FOND)
         conteneur_boutons.pack(expand=True)
@@ -68,13 +76,39 @@ class FrameMenu(tk.Frame):
         bouton(conteneur_boutons, "🪢  Pendu", lambda: demarrer_pendu(app)).pack(pady=8)
         bouton(conteneur_boutons, "❌⭕  Morpion", lambda: demarrer_morpion(app)).pack(pady=8)
 
+        self._afficher_stats()
+
         tk.Button(
             self, text="Quitter", command=app.destroy,
             font=("Segoe UI", 10), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE,
             relief="flat", cursor="hand2", bd=0,
-        ).pack(pady=(30, 20), side="bottom")
+        ).pack(pady=(15, 20), side="bottom")
+
+    def _afficher_stats(self):
+        """Affiche un petit résumé des scores cumulés, sous les boutons de jeu."""
+        scores = charger_scores()
+
+        conteneur = tk.Frame(self, bg=COULEUR_FOND)
+        conteneur.pack(pady=(20, 0))
+
+        lignes = [
+            ("🔤 Anagramme", f"{scores['anagramme']['victoires']} gagnées / {scores['anagramme']['defaites']} ratées"),
+            ("🪢 Pendu", f"{scores['pendu']['victoires']} gagnées / {scores['pendu']['defaites']} ratées"),
+            ("❌⭕ Morpion", f"{scores['morpion']['victoires']}V / {scores['morpion']['defaites']}D / {scores['morpion']['nuls']}N"),
+        ]
+
+        for nom, texte in lignes:
+            ligne = tk.Frame(conteneur, bg=COULEUR_FOND)
+            ligne.pack(fill="x", pady=1)
+            tk.Label(
+                ligne, text=nom, font=("Segoe UI", 9), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE, width=14, anchor="w",
+            ).pack(side="left")
+            tk.Label(
+                ligne, text=texte, font=("Segoe UI", 9), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE, anchor="w",
+            ).pack(side="left")
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+    

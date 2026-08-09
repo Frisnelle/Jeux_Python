@@ -1,7 +1,8 @@
 """
 Version graphique (Tkinter) de l'anagramme, intégrée au hub à fenêtre
-unique : choix de catégorie -> choix de difficulté -> écran de jeu,
-chaque étape remplaçant la précédente dans la même fenêtre.
+unique : choix de catégorie -> choix de difficulté -> écran de jeu.
+Inclut un bouton Abandonner pendant la partie, un bouton Rejouer une
+fois la partie finie, et l'enregistrement du résultat dans le score.
 """
 
 import os
@@ -15,9 +16,11 @@ from mots import MOTS
 
 from style import (
     COULEUR_FOND, COULEUR_TITRE, COULEUR_SECONDAIRE,
-    COULEUR_SUCCES, COULEUR_ERREUR, POLICE_MONO, bouton, bouton_retour,
+    COULEUR_SUCCES, COULEUR_ERREUR, POLICE_MONO,
+    bouton, bouton_secondaire, bouton_retour,
 )
 from ecran_choix import FrameChoix
+from score import enregistrer_resultat
 
 DIFFICULTES = {
     "Facile":    {"duree": 45, "min_longueur": 4,  "max_longueur": 6},
@@ -66,6 +69,8 @@ class FrameAnagrammeJeu(tk.Frame):
     def __init__(self, parent, app, categorie, params):
         super().__init__(parent, bg=COULEUR_FOND)
         self.app = app
+        self.categorie = categorie
+        self.params = params
         self.duree = params["duree"]
         self.mot = choisir_mot(categorie, params["min_longueur"], params["max_longueur"])
         self.melange = melanger_mot(self.mot)
@@ -75,7 +80,7 @@ class FrameAnagrammeJeu(tk.Frame):
         tk.Label(
             self, text=f"Catégorie : {categorie.capitalize()}",
             font=("Segoe UI", 16, "bold"), bg=COULEUR_FOND, fg=COULEUR_TITRE,
-        ).pack(pady=(45, 5))
+        ).pack(pady=(40, 5))
 
         self.label_chrono = tk.Label(
             self, text="", font=("Segoe UI", 15, "bold"),
@@ -93,13 +98,20 @@ class FrameAnagrammeJeu(tk.Frame):
         self.champ_reponse.bind("<Return>", lambda e: self.valider())
         self.champ_reponse.focus()
 
-        bouton(self, "Valider", self.valider, largeur=16, hauteur=1).pack(pady=5)
+        # Boutons actifs pendant la partie : Valider / Abandonner
+        self.conteneur_jeu = tk.Frame(self, bg=COULEUR_FOND)
+        self.conteneur_jeu.pack(pady=5)
+        bouton(self.conteneur_jeu, "Valider", self.valider, largeur=12, hauteur=1).grid(row=0, column=0, padx=5)
+        bouton_secondaire(self.conteneur_jeu, "Abandonner", self.abandonner, largeur=12).grid(row=0, column=1, padx=5)
 
         self.label_resultat = tk.Label(
             self, text="", font=("Segoe UI", 13, "bold"),
             bg=COULEUR_FOND, fg=COULEUR_TITRE,
         )
         self.label_resultat.pack(pady=15)
+
+        # Boutons affichés seulement une fois la partie finie
+        self.conteneur_fin = tk.Frame(self, bg=COULEUR_FOND)
 
         bouton_retour(self, app.afficher_menu).pack(side="bottom", pady=20)
 
@@ -122,17 +134,35 @@ class FrameAnagrammeJeu(tk.Frame):
         reponse = self.champ_reponse.get().strip().upper()
         self.terminer(gagne=(reponse == self.mot), temps_ecoule=False)
 
-    def terminer(self, gagne, temps_ecoule):
+    def abandonner(self):
+        if self.partie_terminee:
+            return
+        self.terminer(gagne=False, temps_ecoule=False, abandon=True)
+
+    def terminer(self, gagne, temps_ecoule, abandon=False):
         self.partie_terminee = True
         self.champ_reponse.config(state="disabled")
-        if temps_ecoule:
+        self.conteneur_jeu.pack_forget()
+
+        if abandon:
+            texte, couleur = f"🚩 Partie abandonnée. Le mot était : {self.mot}", COULEUR_ERREUR
+        elif temps_ecoule:
             texte, couleur = f"⏰ Temps écoulé ! Le mot était : {self.mot}", COULEUR_ERREUR
         elif gagne:
             texte, couleur = f"🎉 Bravo, c'était {self.mot} !", COULEUR_SUCCES
         else:
             texte, couleur = f"❌ Raté, le mot était : {self.mot}", COULEUR_ERREUR
+
         self.label_chrono.config(text="")
         self.label_resultat.config(text=texte, fg=couleur)
+
+        enregistrer_resultat("anagramme", "victoires" if gagne else "defaites")
+
+        self.conteneur_fin.pack(pady=5)
+        bouton(self.conteneur_fin, "🔁 Rejouer", self.rejouer, largeur=14, hauteur=1).pack()
+
+    def rejouer(self):
+        self.app.afficher_frame(FrameAnagrammeJeu, categorie=self.categorie, params=self.params)
 
 
 if __name__ == "__main__":
