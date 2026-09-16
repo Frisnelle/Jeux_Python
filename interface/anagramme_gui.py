@@ -137,7 +137,9 @@ class FrameAnagrammeJeu(tk.Frame):
     def abandonner(self):
         if self.partie_terminee:
             return
-        self.terminer(gagne=False, temps_ecoule=False, abandon=True)
+        self.partie_terminee = True
+        enregistrer_resultat("anagramme", "defaites")
+        self.app.afficher_menu()
 
     def terminer(self, gagne, temps_ecoule, abandon=False):
         self.partie_terminee = True

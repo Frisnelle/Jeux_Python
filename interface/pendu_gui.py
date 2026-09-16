@@ -139,17 +139,16 @@ class FramePenduJeu(tk.Frame):
     def abandonner(self):
         if self.partie_terminee:
             return
-        self._terminer(gagne=False, abandon=True)
+        self.partie_terminee = True
+        enregistrer_resultat("pendu", "defaites")
+        self.app.afficher_menu()
 
-    def _terminer(self, gagne, abandon=False):
+    def _terminer(self, gagne):
         self.partie_terminee = True
         for b in self.boutons_lettres.values():
             b.config(state="disabled")
 
-        if abandon:
-            self.label_essais.config(text=f"🚩 Partie abandonnée. C'était {self.mot}", fg=COULEUR_ERREUR)
-            self.label_mot.config(text=self.mot)
-        elif gagne:
+        if gagne:
             self.label_essais.config(text=f"🎉 Gagné ! C'était {self.mot}", fg=COULEUR_SUCCES)
         else:
             self.label_essais.config(text=f"💀 Perdu ! C'était {self.mot}", fg=COULEUR_ERREUR)

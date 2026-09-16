@@ -9,6 +9,7 @@ Projet personnel réalisé pour pratiquer la programmation orientée objet, les 
 - **Anagramme chronométré** — un mot mélangé à retrouver avant la fin du temps imparti, avec catégories et niveaux de difficulté.
 - **Pendu** — devine le mot secret lettre par lettre avant d'épuiser tes essais.
 - **Morpion** — 2 joueurs en local, ou contre une IA (algorithme **minimax**) avec 4 niveaux de difficulté (Facile, Moyen, Difficile, Impossible).
+- **Puissance 4** — grille 6×7, 2 joueurs en local ou contre une IA (**minimax** + élagage alpha-bêta, profondeur limitée) avec 4 niveaux de difficulté.
 
 Les 9 catégories de mots disponibles (ville, pays, animal, fruit, métier, sport, couleur, objet, instrument) sont partagées entre l'anagramme et le pendu.
 
@@ -33,6 +34,7 @@ Une seule fenêtre, avec navigation par écrans (menu → choix de catégorie/di
 - un chrono en temps réel pour l'anagramme,
 - un pendu qui se dessine progressivement sur un `Canvas`,
 - une grille de morpion cliquable avec IA,
+- un plateau de Puissance 4 cliquable avec IA,
 - un suivi des scores (victoires/défaites) sauvegardé entre les lancements.
 
 ## 📁 Structure du projet
@@ -44,6 +46,7 @@ jeux-python/
 ├── anagramme.py             # Logique du jeu d'anagramme (console)
 ├── pendu.py                 # Logique du jeu du pendu (console)
 ├── morpion.py                # Logique du morpion + IA minimax (console)
+├── puissance4.py             # Logique du Puissance 4 + IA minimax (console)
 ├── scores.json               # Scores sauvegardés (généré automatiquement, non versionné)
 └── interface/
     ├── app.py                # Point d'entrée version graphique
@@ -52,13 +55,14 @@ jeux-python/
     ├── score.py                # Sauvegarde et lecture des statistiques (JSON)
     ├── anagramme_gui.py         # Anagramme version graphique
     ├── pendu_gui.py              # Pendu version graphique
-    └── morpion_gui.py            # Morpion version graphique
+    ├── morpion_gui.py            # Morpion version graphique
+    └── puissance4_gui.py         # Puissance 4 version graphique
 ```
 
 ## 🧠 Ce que ce projet met en pratique
 
 - Séparation des données (`mots.py`), de la logique de jeu, et de l'interface
-- Algorithme **minimax** pour une IA de morpion configurable (de battable à imbattable)
+- Algorithme **minimax** (morpion) et **minimax + alpha-bêta** (Puissance 4) pour des IA configurables
 - Interface Tkinter à fenêtre unique avec navigation par `Frame` (pas de popups multiples)
 - Persistance de données simple via JSON (scores)
 - Réutilisation de composants d'interface entre plusieurs jeux (`ecran_choix.py`)
@@ -67,7 +71,7 @@ jeux-python/
 
 - Version web avec Flask
 - Historique de parties détaillé (pas seulement des compteurs)
-- Nouveaux jeux (Puissance 4, quiz...)
+- Nouveaux jeux (quiz, memory...)
 
 ## 🛠️ Prérequis
 

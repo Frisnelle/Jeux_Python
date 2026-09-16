@@ -3,7 +3,7 @@
 Affiche un titre et une grille de boutons ; cliquer sur une option
 appelle le callback fourni avec la valeur associée à ce bouton.
 
-Réutilisé par les 3 jeux pour éviter de dupliquer ce code partout.
+Réutilisé par les jeux pour éviter de dupliquer ce code partout.
 """
 
 import tkinter as tk

@@ -184,6 +184,8 @@ class FrameMorpionJeu(tk.Frame):
             self.after(400, self.jouer_coup_ia)
 
     def jouer_coup_ia(self):
+        if self.partie_terminee or not self.winfo_exists():
+            return
         index = choisir_coup_ia(self.grille, self.joueur_ia, self.joueur_humain, self.proba_aleatoire)
         self._placer(index, self.joueur_ia)
         if self._verifier_fin():
@@ -200,10 +202,9 @@ class FrameMorpionJeu(tk.Frame):
         if self.partie_terminee:
             return
         self.partie_terminee = True
-        self.label_tour.config(text="🚩 Partie abandonnée")
-        self._desactiver_tout()
         if self.contre_ia:
             enregistrer_resultat("morpion", "defaites")
+        self.app.afficher_menu()
 
     def _verifier_fin(self):
         combo = trouver_combinaison_gagnante(self.grille)

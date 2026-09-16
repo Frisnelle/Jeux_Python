@@ -20,7 +20,7 @@ class App(tk.Tk):
         self.title("Hub de jeux")
         self.configure(bg=COULEUR_FOND)
         self.resizable(False, False)
-        self._centrer(520, 620)
+        self._centrer(520, 680)
 
         self.conteneur = tk.Frame(self, bg=COULEUR_FOND)
         self.conteneur.pack(fill="both", expand=True)
@@ -71,10 +71,12 @@ class FrameMenu(tk.Frame):
         from anagramme_gui import demarrer_anagramme
         from pendu_gui import demarrer_pendu
         from morpion_gui import demarrer_morpion
+        from puissance4_gui import demarrer_puissance4
 
-        bouton(conteneur_boutons, "🔤  Anagramme", lambda: demarrer_anagramme(app)).pack(pady=8)
-        bouton(conteneur_boutons, "🪢  Pendu", lambda: demarrer_pendu(app)).pack(pady=8)
-        bouton(conteneur_boutons, "❌⭕  Morpion", lambda: demarrer_morpion(app)).pack(pady=8)
+        bouton(conteneur_boutons, "🔤  Anagramme", lambda: demarrer_anagramme(app)).pack(pady=6)
+        bouton(conteneur_boutons, "🪢  Pendu", lambda: demarrer_pendu(app)).pack(pady=6)
+        bouton(conteneur_boutons, "❌⭕  Morpion", lambda: demarrer_morpion(app)).pack(pady=6)
+        bouton(conteneur_boutons, "🔴🟡  Puissance 4", lambda: demarrer_puissance4(app)).pack(pady=6)
 
         self._afficher_stats()
 
@@ -95,13 +97,14 @@ class FrameMenu(tk.Frame):
             ("🔤 Anagramme", f"{scores['anagramme']['victoires']} gagnées / {scores['anagramme']['defaites']} ratées"),
             ("🪢 Pendu", f"{scores['pendu']['victoires']} gagnées / {scores['pendu']['defaites']} ratées"),
             ("❌⭕ Morpion", f"{scores['morpion']['victoires']}V / {scores['morpion']['defaites']}D / {scores['morpion']['nuls']}N"),
+            ("🔴🟡 Puissance 4", f"{scores['puissance4']['victoires']}V / {scores['puissance4']['defaites']}D / {scores['puissance4']['nuls']}N"),
         ]
 
         for nom, texte in lignes:
             ligne = tk.Frame(conteneur, bg=COULEUR_FOND)
             ligne.pack(fill="x", pady=1)
             tk.Label(
-                ligne, text=nom, font=("Segoe UI", 9), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE, width=14, anchor="w",
+                ligne, text=nom, font=("Segoe UI", 9), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE, width=16, anchor="w",
             ).pack(side="left")
             tk.Label(
                 ligne, text=texte, font=("Segoe UI", 9), bg=COULEUR_FOND, fg=COULEUR_SOUS_TITRE, anchor="w",

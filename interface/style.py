@@ -1,6 +1,6 @@
 """
 Style partagé (couleurs, polices, boutons) pour tout le hub de jeux,
-afin que le menu et les 3 jeux aient un rendu visuel cohérent.
+afin que le menu et les jeux aient un rendu visuel cohérent.
 """
 
 import tkinter as tk

@@ -13,6 +13,7 @@ SCORES_PAR_DEFAUT = {
     "anagramme": {"victoires": 0, "defaites": 0},
     "pendu": {"victoires": 0, "defaites": 0},
     "morpion": {"victoires": 0, "defaites": 0, "nuls": 0},
+    "puissance4": {"victoires": 0, "defaites": 0, "nuls": 0},
 }
 
 
@@ -25,6 +26,8 @@ def charger_scores():
             scores = json.load(f)
         for jeu, valeurs in SCORES_PAR_DEFAUT.items():
             scores.setdefault(jeu, dict(valeurs))
+            for cle, valeur in valeurs.items():
+                scores[jeu].setdefault(cle, valeur)
         return scores
     except (json.JSONDecodeError, OSError):
         return {jeu: dict(valeurs) for jeu, valeurs in SCORES_PAR_DEFAUT.items()}
