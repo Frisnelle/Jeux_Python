@@ -137,10 +137,9 @@ class FramePenduJeu(tk.Frame):
                 self._terminer(gagne=False)
 
     def abandonner(self):
-        if self.partie_terminee:
-            return
-        self.partie_terminee = True
-        enregistrer_resultat("pendu", "defaites")
+        if not self.partie_terminee:
+            self.partie_terminee = True
+            enregistrer_resultat("pendu", "defaites")
         self.app.afficher_menu()
 
     def _terminer(self, gagne):

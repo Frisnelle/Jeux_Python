@@ -180,11 +180,10 @@ class FramePuissance4Jeu(tk.Frame):
         self._jouer(col)
 
     def abandonner(self):
-        if self.partie_terminee:
-            return
-        self.partie_terminee = True
-        if self.contre_ia:
-            enregistrer_resultat("puissance4", "defaites")
+        if not self.partie_terminee:
+            self.partie_terminee = True
+            if self.contre_ia:
+                enregistrer_resultat("puissance4", "defaites")
         self.app.afficher_menu()
 
     def _verifier_fin(self):

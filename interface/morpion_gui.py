@@ -199,11 +199,10 @@ class FrameMorpionJeu(tk.Frame):
         self.boutons[index].config(text=symbole, fg=couleur, state="disabled")
 
     def abandonner(self):
-        if self.partie_terminee:
-            return
-        self.partie_terminee = True
-        if self.contre_ia:
-            enregistrer_resultat("morpion", "defaites")
+        if not self.partie_terminee:
+            self.partie_terminee = True
+            if self.contre_ia:
+                enregistrer_resultat("morpion", "defaites")
         self.app.afficher_menu()
 
     def _verifier_fin(self):
